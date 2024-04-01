@@ -1,0 +1,24 @@
+.loader_outer{
+    display:flex;
+    justify-content:center;
+}
+
+.loader {
+  height: 10rem;
+  width: 10rem;
+  border-radius: 50%;
+  border: 10px solid rgba(0, 187, 255, 0.698);
+  border-top-color: #4800ae;
+  box-sizing: border-box;
+  background: transparent;
+  animation: loading 1s linear infinite;
+}
+
+@keyframes loading {
+  0% {
+    transform: rotate(0deg);
+  }
+  0% {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %} Page 400 {% endblock title %}
+
+{% load static %}
+
+{% block content %}
+<main id="main" class="main">
+  <div class="col-middle">
+      <div class="text-center text-center">
+        <h1 class="error-number">400</h1>
+        <h2>Sorry but it seems like you have created Bad request!</h2>
+        <p>The request you are doing is not valid.Please Try Again
+        </p>
+        <div class="mid_center">
+<!--          <h3>Search</h3>-->
+            <div class="col-xs-12 form-group pull-right top_search">
+              <div class="input-group">
+<!--                <input type="text" class="form-control" placeholder="Search for...">-->
+                <span class="input-group-btn">
+                        <a href="{% url 'home' %}" class="btn btn-danger" type="button">Go Back</a>
+                    </span>
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+ </main>
+{% endblock content %}

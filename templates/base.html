@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+{% load static %}
+
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>You-Transfer 
+    {% if title %}
+      - {{title}}
+    {% endif %}
+  </title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <!-- Favicons -->
+  <link href="{% static 'img/favicon.png' %}" rel="icon">
+  <link href="{% static 'img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'vendor/boxicons/css/boxicons.min.css' %}" rel="stylesheet">
+  <link href="{% static 'vendor/quill/quill.snow.css' %}" rel="stylesheet">
+  <link href="{% static 'vendor/quill/quill.bubble.css' %}" rel="stylesheet">
+  <link href="{% static 'vendor/remixicon/remixicon.css' %}" rel="stylesheet">
+  <link href="{% static 'vendor/simple-datatables/style.css' %}" rel="stylesheet">
+
+  <!-- Template Main CSS File -->
+  <link href="{% static 'css/style.css' %}" rel="stylesheet">
+  {% block stylesheets %}
+  {% endblock stylesheets %}
+</head>
+
+<body>
+
+    {% if user.is_authenticated %}
+  <!-- ======= Header ======= -->
+  <header id="header" class="header fixed-top d-flex align-items-center">
+
+    <div class="d-flex align-items-center justify-content-between">
+      <a href="index.html" class="logo d-flex align-items-center">
+        <img src="{% static 'img/logo.png' %}" alt="">
+        <span class="d-none d-lg-block">YouTransfer</span>
+      </a>
+      <i class="bi bi-list toggle-sidebar-btn"></i>
+    </div><!-- End Logo -->
+
+    
+
+    <nav class="header-nav ms-auto">
+      <ul class="d-flex align-items-center">
+
+      
+        
+        <li class="nav-item dropdown pe-3">
+
+          <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+            <img src="{% static 'img/profile-img.jpg' %}" alt="Profile" class="rounded-circle">
+            <span class="d-none d-md-block dropdown-toggle ps-2">{{user.username}}</span>
+          </a><!-- End Profile Iamge Icon -->
+
+          <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+            <li class="dropdown-header">
+              <h6>{{user.username}}</h6>
+              <span>{{user.profile.job_function|default:'unknown'}}</span>
+            </li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+
+            <li>
+              <a class="dropdown-item d-flex align-items-center" href="{% url 'update_profile' %}">
+                <i class="bi bi-person"></i>
+                <span>My Profile</span>
+              </a>
+            </li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+
+            <li>
+              <a class="dropdown-item d-flex align-items-center" href="{% url 'change_password' %}">
+                <i class="bi bi-gear"></i>
+                <span>Change Password</span>
+              </a>
+            </li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+
+        
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+
+            <li>
+              <a class="dropdown-item d-flex align-items-center" href="{% url 'logout' %}">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Sign Out</span>
+              </a>
+            </li>
+
+          </ul><!-- End Profile Dropdown Items -->
+        </li><!-- End Profile Nav -->
+
+      </ul>
+    </nav><!-- End Icons Navigation -->
+
+  </header><!-- End Header -->
+  {% endif %}
+
+      {% if messages %}
+      {% for message in messages %}
+      <div class="d-flex justify-content-center">
+      <div class="alert {{ message.tags }} alert-dismissible fade show text-center" role="alert" style="z-index:1000">
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+        </button>
+        {{ message }}
+      </div>
+      </div>
+      {% endfor %}
+    {% endif %}
+
+
+    {% if form.errors %}
+    {% for field in form %}
+        {% for error in field.errors %}
+        <div class="d-flex justify-content-center">
+          <div class="alert alert-primary alert-dismissible fade show" role="alert">
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            {{ error|escape }}
+          </div>
+          </div>
+
+
+      {% endfor %}
+    {% endfor %}
+    {% endif %}
+
+  {% if user.is_authenticated %}
+
+  <!-- ======= Sidebar ======= -->
+  <aside id="sidebar" class="sidebar">
+
+    <ul class="sidebar-nav" id="sidebar-nav">
+
+      <li class="nav-item">
+        <a class="nav-link " href="{% url 'home' %}">
+          <i class="bi bi-grid"></i>
+          <span>Dashboard</span>
+        </a>
+      </li><!-- End Dashboard Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Files</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="components-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="{% url 'users_files' %}">
+              <i class="bi bi-circle"></i><span>Your Files</span>
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'file_shared_with_user' %}">
+              <i class="bi bi-circle"></i><span>Shared With You Files</span>
+            </a>
+          </li>
+         
+        </ul>
+         <a class="nav-link collapsed" data-bs-target="#components-nav2" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Youtube Downloader</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="components-nav2" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="#">
+              <i class="bi bi-circle"></i><span>Single Video</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <i class="bi bi-circle"></i><span>Playlist Videos</span>
+            </a>
+          </li>
+
+        </ul>
+      </li><!-- End Components Nav -->
+
+      
+    </ul>
+
+  </aside><!-- End Sidebar-->
+  {% endif %}
+
+  {% block content %}
+  {% endblock content %}
+
+  {% if user.is_authenticated %}
+
+  <!-- ======= Footer ======= -->
+  <!-- <footer id="footer" class="footer">
+    <div class="copyright">
+      &copy; Copyright <strong><span>YouTransfer</span></strong>. All Rights Reserved
+    </div>
+ 
+  </footer> -->
+  <!-- End Footer -->
+
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+ {% endif %}
+
+</body>
+<!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"> -->
+<!-- </script> -->
+{% block javascripts %}
+
+     <!-- jQuery -->
+     <script src="{% static 'vendor/jquery/dist/jquery.min.js' %}"></script>
+  <!-- Vendor JS Files -->
+  <script src="{% static 'vendor/apexcharts/apexcharts.min.js' %}"></script>
+  <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'vendor/chart.js/chart.min.js' %}"></script>
+  <script src="{% static 'vendor/echarts/echarts.min.js' %}"></script>
+  <script src="{% static 'vendor/quill/quill.min.js' %}"></script>
+  <script src="{% static 'vendor/simple-datatables/simple-datatables.js' %}"></script>
+  <script src="{% static 'vendor/tinymce/tinymce.min.js' %}"></script>
+  <script src="{% static 'vendor/php-email-form/validate.js' %}"></script>
+
+  <!-- Template Main JS File -->
+  <script src="{% static 'js/main.js' %}"></script>
+
+{% endblock javascripts %}
+</html>

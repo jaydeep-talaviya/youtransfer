@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block stylesheets %}
+  {{ block.super }}
+  <link href="{% static 'css/loader.css' %}?v=5" rel="stylesheet">
+
+  <link href="{% static 'vendor/dropzone/dist/min/dropzone.min.css' %}?v=5" rel="stylesheet">
+
+{% endblock stylesheets %}
+
+{% block content %}
+<main id="main" class="main">
+
+    <div class="pagetitle">
+      <h1>File Uploader</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+        </ol>
+      </nav>
+    </div><!-- End Page Title -->
+
+    <section class="section dashboard">
+      <div class="row">
+
+        <!-- Right side columns -->
+        <div class="col-lg-12">
+
+          <!-- Recent Activity -->
+          <div class="card">
+            <div class="card-body">
+              
+              <!-- <h5 class="card-title">Upload Files</h5> -->
+              <p class="text-dark text-center pt-3">Drag multiple files to the box below for multi upload or click to select files.</p>
+              <form action="/" method="post" class="dropzone">
+                {% csrf_token %}
+
+                </form>
+            </div>
+          </div><!-- End Recent Activity -->
+        </div><!-- End Right side columns -->
+
+      </div>
+      <div class="row" >
+        <form action="/" method="post" id="demo-form" class="form-horizontal form-label-left input_mask">
+            {% csrf_token %}
+         <div class="row">
+          <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
+            <label for="title"> Title :</label>
+            <input type="text" name="title" id="title" class="form-control"  />
+            <p class="pt-2">This Files will be remove after 24 hours!</p>
+         </div>
+          <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
+             <label for="message" >Message </label>
+              <textarea id="message" class="form-control" name="message" rows="3"></textarea>
+          </div>
+         </div>
+  
+                <div class="show_error" style="color:red;">
+
+                </div>
+              <br/>
+
+          </form>
+          <div class="form-group ">
+            <div class="text-center">
+              <button type="submit" id="submit-all" class="btn btn-round btn-success "> Save <i class="fa fa-save"></i></button>
+
+            </div>
+          </div>
+    </div>
+    </section>
+
+  </main><!-- End #main -->
+{% endblock content %}
+
+{% block javascripts %}
+  {{ block.super}}
+<script src="https://malsup.github.io/jquery.blockUI.js"></script>
+
+  <script src="{% static 'vendor/dropzone/dist/min/dropzone.min.js' %}"></script>
+<script type="text/javascript">
+Dropzone.autoDiscover = false;
+
+    var myDropzone = new Dropzone(".dropzone", {
+
+        autoProcessQueue: false,
+        uploadMultiple: true,
+        parallelUploads: 50,
+        maxFiles: 50,
+        maxFilesize: 500,
+
+        addRemoveLinks: true,
+        init: function() {
+          var submitButton = document.querySelector("#submit-all")
+            myDropzone = this; // closure
+
+          document.onpaste = function(event){
+          var items = (event.clipboardData || event.originalEvent.clipboardData).items;
+          for (index in items) {
+            var item = items[index];
+            if (item.kind === 'file') {
+              // adds the file to your dropzone instance
+              myDropzone.addFile(item.getAsFile())
+
+            }
+          }
+
+          }
+
+          $('#submit-all').click(function(e){
+            console.log(">>>>>>>",e)
+          // var auto_delete=$('input[name="auto_delete"]').val()
+          if (myDropzone.files.length > 0){
+
+            e.preventDefault();
+            e.stopPropagation();
+           $.blockUI({css: { backgroundColor: 'transparent', border: '0px'}, message: '<div class="loader_outer"><div class="loader"></div></div>' });
+
+            myDropzone.processQueue();
+
+            myDropzone.on('success', function(file, resp){
+            if (resp.errors){
+
+            $('.show_error')[0].innerHTML=resp.errors
+
+            }
+            else{
+                window.location.href=window.location.href+'upload/success/'+String(resp.new_created)
+
+            }
+            $.unblockUI();
+            })
+          }
+          else{
+            if (auto_delete.trim().length === 0){
+                alert("Auto Delete is Required!")
+            }
+            if (myDropzone.files.length > 0){
+                 alert("Files are Required!")
+
+            }
+          }
+
+
+          });
+          this.on('sendingmultiple', function (data, xhr, formData) {
+                    formData.append("title",$('input[name="title"]').val());
+                    formData.append("message",$('textarea[name="message"]').val());
+
+                });
+            this.on("error", function(file, message) {
+                    alert(message);
+                    this.removeFile(file);
+                });
+        }
+
+        });
+</script>
+{% endblock javascripts %}

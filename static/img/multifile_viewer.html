@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<main id="main" class="main">
+
+    <div class="pagetitle">
+        <h1>File Viewer</h1>
+
+    </div><!-- End Page Title -->
+    <section class="section dashboard">
+        <div class="row">
+            <!-- Right side columns -->
+            <div class="col-lg-12">
+
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row py-3">
+                            <h4 class="text-center"> {{last_uploaded.title}}</h4>
+                        </div>
+                        <div class="row">
+                            {% if userfiles_obj %}
+                            <div class="container">
+                              
+                                <div class="row py-4">
+                                    <!-- <div class="file_download_button_parent col-md-8 col-sm-8 col-12">
+                                        <div class="file_download_buttons_div"> -->
+                                            {% for file in userfiles_obj.downloadfile_set.iterator %}
+                                            {% if not file.is_image %}
+
+                                            <div class="col-sm-2 col-md-1 col-xs-3">
+                                                <div class="single_file_block">
+                                                    {% if file.extension %}
+                                                    {% if file.extension == 'video' %}
+                                                    <a class="single_file_block_inner"
+                                                        href="">
+                                                        <i class="fa fa-cloud-download" data-toggle="tooltip"
+                                                            data-placement="top" title="Download"></i>
+                                                    </a>
+                                                    <a href=""
+                                                        data-toggle="tooltip" style="word-break: break-word;"
+                                                        data-placement="top"
+                                                        title="{{file.file_name}}">{{file.file_name|truncatechars:15}}</a>
+                                                    {% else %}
+                                                    <a class="single_file_block_inner"
+                                                        href="">
+                                                        {% if file.extension %}
+                                                        {% if file.extension == '.csv' %}
+                                                        <img src="{% static 'images/csv.png' %}" alt="csv"
+                                                            width="40px" />
+                                                        {% elif file.extension == '.html' %}
+                                                        <img src="{% static 'images/html.png' %}" alt="csv"
+                                                            width="40px" />
+
+                                                        {% elif file.extension == '.css' %}
+                                                        <img src="{% static 'images/css.jpeg' %}" alt="csv"
+                                                            width="40px" />
+
+                                                        {% elif file.extension == '.js' %}
+                                                        <img src="{% static 'images/js.jpeg' %}" alt="csv"
+                                                            width="40px" />
+
+                                                        {% elif file.extension == '.py' %}
+                                                        <img src="{% static 'images/python.jpeg' %}" alt="csv"
+                                                            width="40px" />
+
+                                                        {% elif file.extension in '.xlsx,.xlsm,.xlsb,.xltx' %}
+                                                        <img src="{% static 'images/excel.jpeg' %}" alt="csv"
+                                                            width="40px" />
+
+                                                        {% elif file.extension == '.zip' %}
+                                                        <img src="{% static 'images/zip.jpeg' %}" alt="csv"
+                                                            width="40px" />
+
+                                                        {% else %}
+                                                        <i class="fa fa-cloud-download" data-toggle="tooltip"
+                                                            data-placement="top" title="Download"></i>
+
+                                                        {% endif %}
+                                                        {% else %}
+                                                        <i class="fa fa-cloud-download" data-toggle="tooltip"
+                                                            data-placement="top" title="Download"></i>
+
+                                                        {% endif %}
+                                                    </a>
+                                                    <a href="#"
+                                                        data-toggle="tooltip" style="word-break: break-word;"
+                                                        data-placement="top"
+                                                        title="{{file.file_name}}">{{file.file_name|truncatechars:15}}</a>
+                                                    {% endif %}
+                                                    {% endif %}
+
+                                                </div>
+                                            </div>
+
+                                            {% endif %}
+                                            {% endfor %}
+                                        <!-- </div>
+                                    </div> -->
+                                   
+                                  
+                                </div>
+                                <div class="row pb-4">
+                                    <div class="download-content text-end">
+                                        <a href="" type="button" class="btn btn-success">
+                                            Download
+                                            <i class="fa fa-cloud-download" data-toggle="tooltip" data-placement="top"
+                                                title="Download"></i>
+                                        </a>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            {% if any_image %}
+                            <div class="text-center">
+                                <div class="image col-8 offset-2">
+                                    <div class="slideshow-container">
+                                        {% for file in userfiles_obj.downloadfile_set.iterator %}
+                                        {% if file.is_image %}
+
+                                        <div class="mySlides fade2 images">
+
+
+
+                                            <img src="{{file.uploads.url}}" style="width: 80%;">
+                                            <div class="text">
+                                                <div class="download-content-btns">
+                                                    <input type="text" class="form-control hidden" value=""
+                                                        id="myInput_{{file.id}}">
+
+
+                                                    <a type="button" class="btn btn-danger" id="{{file.id}}"
+                                                        onclick="myFunction(this)" data-toggle="tooltip"
+                                                        data-placement="top" title="{{file.file_name}}"><i
+                                                            class="fa fa-link"></i></a>
+
+                                                    <a class="btn btn-danger" target="_blank" href=""
+                                                        data-toggle="tooltip" data-placement="top"
+                                                        title="{{file.file_name}}"> <i class="fa fa-cloud-download"
+                                                            data-toggle="tooltip" data-placement="top"
+                                                            title="Download"></i></a>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                        {% endif %}
+                                        {% endfor %}
+
+                                        <a class="prev" onclick="plusSlides(-1)">❮</a>
+                                        <a class="next" onclick="plusSlides(1)">❯</a>
+                                    </div>
+                                </div>
+
+                                <br>
+                                <div style="text-align:center">
+                                    {% for file in userfiles_obj.downloadfile_set.iterator %}
+                                    {% if file.is_image %}
+                                    <span class="dot" onclick="currentSlide({{forloop.counter}})"></span>
+
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <div id="image-viewer">
+                                <span class="close">&times;</span>
+                                <img class="modal-content" id="full-image">
+                            </div>
+
+
+                            {% else %}
+                            <div class="text-center">
+                                <h2>No Data Found</h2>
+                            </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+{% endblock content %}
+
+{% block javascripts %}
+{{ block.super }}
+
+{% endblock javascripts %}

@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<main id="main" class="main">
+
+    <div class="pagetitle">
+        <h1>File Viewer</h1>
+
+    </div><!-- End Page Title -->
+    <section class="section dashboard">
+        <div class="row">
+            <!-- Right side columns -->
+            <div class="col-lg-12">
+
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row py-3">
+                            <h4 class="text-center"> {{last_uploaded.title}}</h4>
+                        </div>
+                        <div class="row">
+                            {% if userfiles_obj %}
+                            <div class="container">
+                              
+                                <div class="row py-4">
+                        
+                                            {% for file in userfiles_obj.downloadfile_set.iterator %}
+                                            {% if not file.is_image %}
+                                            <div class="col-sm-2 col-md-1 col-xs-3">
+                                                <div class="single_file_block">
+                                                    {% if file.extension %}
+                                                    {% if file.extension == 'video' %}
+                                                    <a class="single_file_block_inner"
+                                                        href="{% url 'download_single_file' doc_num=file.unique_id  %}">
+                                                        <i class="bx bxs-video"  data-toggle="tooltip"
+                                                            data-placement="top" title="Download"></i>
+                                                    </a>
+                                                    <a href="{% url 'download_single_file' doc_num=file.unique_id  %}"
+                                                        data-toggle="tooltip" style="word-break: break-word;"
+                                                        data-placement="top"
+                                                        title="{{file.file_name}}">{{file.file_name|truncatechars:15}}</a>
+                                                    {% else %}
+                                                    <a class="single_file_block_inner"
+                                                        href="{% url 'download_single_file' doc_num=file.unique_id  %}">
+                                                        {% if file.extension %}
+                                                        {% if file.extension == '.csv' %}
+                                                        <img src="{% static 'img/csv.png' %}" alt="csv"
+                                                            width="40px" height="30px"/>
+                                                        {% elif file.extension == '.html' %}
+                                                        <img src="{% static 'img/html.png' %}" alt="csv"
+                                                            width="40px" height="30px"/>
+
+                                                        {% elif file.extension == '.css' %}
+                                                        <img src="{% static 'img/css.jpeg' %}" alt="csv"
+                                                            width="40px" height="30px"/>
+
+                                                        {% elif file.extension == '.js' %}
+                                                        <img src="{% static 'img/js.jpeg' %}" alt="csv"
+                                                            width="40px" height="30px"/>
+
+                                                        {% elif file.extension == '.py' %}
+                                                        <img src="{% static 'img/python.jpeg' %}" alt="csv"
+                                                            width="40px" height="30px" />
+
+                                                        {% elif file.extension in '.xlsx,.xlsm,.xlsb,.xltx' %}
+                                                        <img src="{% static 'img/excel.jpeg' %}" alt="csv"
+                                                            width="40px" height="30px"/>
+
+                                                        {% elif file.extension == '.zip' %}
+                                                        <img src="{% static 'img/zip.jpeg' %}" alt="csv"
+                                                            width="40px" height="30px"/>
+
+                                                        {% else %}
+                                                        <i class="bx bxs-file-blank" style="font-size: xx-large;" data-toggle="tooltip"
+                                                            data-placement="top" title="Download"></i>
+
+                                                        {% endif %}
+                                                        {% else %}
+                                                        <i class="bx bxs-file-blank" style="font-size: xx-large;" data-toggle="tooltip"
+                                                            data-placement="top" title="Download"></i>
+
+                                                        {% endif %}
+                                                    </a>
+                                                    <a href="{% url 'download_single_file' doc_num=file.unique_id  %}"
+                                                        data-toggle="tooltip" style="word-break: break-word;"
+                                                        data-placement="top"
+                                                        title="{{file.file_name}}">{{file.file_name|truncatechars:15}}</a>
+                                                    {% endif %}
+                                                    {% endif %}
+
+                                                </div>
+                                            </div>
+
+                                            {% endif %}
+                                            {% endfor %}
+                                        <!-- </div>
+                                    </div> -->
+                                   
+                                  
+                                </div>
+                                <div class="row pb-4">
+                                    <div class="download-content text-center">
+                                        <a href="{% url 'download_file' unique_file_num=userfiles_obj.unique_file_num %}" type="button" class="btn btn-success">
+                                            Download
+                                            <i class="bx bxs-file-blank"  data-toggle="tooltip" data-placement="top"
+                                                title="Download"></i>
+                                        </a>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            {% if any_image %}
+                            <div class="text-center">
+                                <div class="image col-8 offset-2">
+                                    <div id="carouselExampleFade" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                                        <div class="carousel-inner">
+                                        {% for file in userfiles_obj.downloadfile_set.iterator %}
+                                        {% if file.is_image %}
+
+                                            <!-- Slides with fade transition -->
+                                           
+                                                    
+                                                    <div class="carousel-item {% if forloop.counter0 == 0 %} active {% endif %}">
+                                                     
+
+                                                        <img src="{{file.uploads.url}}" class="d-block w-100 " style="max-height:400px" alt="{{file.file_name}}">
+                                                    
+                                                        <div class="carousel-caption  d-md-block">
+                                                            <a class="btn btn-danger" target="_blank" href="{% url 'download_single_file' doc_num=file.unique_id %}" data-toggle="tooltip" data-placement="top" title="{{file.file_name}}"> 
+                                                                <i class="bi bi-arrow-down-circle-fill" data-toggle="tooltip" data-placement="top" title="Download">
+                                                                </i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    
+
+                                        {% endif %}
+                                        {% endfor %}
+                                    </div>
+
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                    </button>
+
+                                </div><!-- End Slides with fade transition -->
+                                </div>
+
+                                <br>
+                              
+                            </div>
+                            {% endif %}
+
+
+                            {% else %}
+                            <div class="text-center">
+                                <h2>No Data Found</h2>
+                            </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+{% endblock content %}
+
+{% block javascripts %}
+{{ block.super }}
+
+{% endblock javascripts %}
