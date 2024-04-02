@@ -23,6 +23,7 @@ from django.urls import path,include,re_path
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('fileshare.urls')),
+    path('',include('yt_download.urls')),
     re_path(r'^password_reset/$', auth_views.PasswordResetView.as_view(),
             {'template_name': "registration/password_reset_form.html"},
             name='password_reset'),

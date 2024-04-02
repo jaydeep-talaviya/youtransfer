@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<main id="main" class="main">
+
+    <div class="pagetitle">
+      <h1>Single Youtube Video/Audio Download</h1>
+
+    </div><!-- End Page Title -->
+
+    <div class="container">
+       <section class="section dashboard">
+              <div class="row">
+                <!-- Right side columns -->
+                <div class="col-lg-12">
+
+                  <!-- Recent Activity -->
+                  <div class="card">
+                    <div class="card-body">
+                        <form action="single/info" method="post" class="w-100 pt-5">
+                            {% csrf_token %}
+                            <div class="row mb-3">
+        <!--                      <label  for="url" class="col-sm-3 col-form-label text-center">-->
+        <!--                          <strong>Paste Link here</strong>-->
+        <!--                      </label>-->
+                              <div class="col-sm-11 py-2">
+                                <input type="search"  id="url" name="url" placeholder="Paste YouTube Video URL(Link) Here" required class="form-control">
+                              </div>
+                                <div class="col-sm-1 py-2">
+                                    <button type="submit" class="btn btn-danger">Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+      </section>
+    </div>
+    <div class="container">
+       <section class="section dashboard">
+              <div class="row">
+                <!-- Right side columns -->
+                <div class="col-lg-12">
+
+                  <!-- Recent Activity -->
+                  <div class="card">
+                    <div class="card-body">
+                        <div class="card-title">
+                             <h2 >Download Below</h2>
+                        </div>
+
+                         <div class="yt-thumb d-flex flex-column align-items-center">
+                            <a href="{{url}}" target="_blank">
+                                <img src="{{thumbnail}}" alt="thumbnail" width="300" height="180">
+                            </a>
+                            <h2 class="mt-3 mb-4 mx-2">{{title}}</h2>
+                        </div>
+
+                        <div class=" mt-3">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Resolution</th>
+                                        <th>Download</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="table-group-divider">
+                                    {% if videos %}
+                                    {% for i in videos %}
+                                    <form action="file/download" method="post" class="form">
+                                        {% csrf_token %}
+                                        <tr>
+                                            <td>{{i.0.mime_type}}</td>
+                                            <td>{{i.0.resolution}} ({{i.1}}MB)</td>
+                                            <input type="hidden" name="url" value="{{url}}">
+                                            <input type="hidden" name="itag" value="{{i.0.itag}}">
+                                            <td><button class="btn btn-success btn-sm" type="submit">Download</button></td>
+                                        </tr>
+                                    </form>
+                                    {% endfor %}
+                                    {% endif %}
+
+                                    {% if audios %}
+                                    <form action="file/download" method="post" class="form">
+                                        {% csrf_token %}
+                                        <tr>
+                                            <td>audio/mp3</td>
+                                            <td>{{audios.0.abr}} ({{audios.1}}MB)</td>
+                                            <input type="hidden" name="url" value="{{url}}">
+                                            <input type="hidden" name="itag" value="{{audios.0.itag}}">
+                                            <td><button class="btn btn-success btn-sm" type="submit">Download</button></td>
+                                        </tr>
+                                    </form>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+       </section>
+    </div>
+</main>
+{% endblock content %}
