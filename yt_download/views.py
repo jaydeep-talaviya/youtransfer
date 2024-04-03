@@ -5,10 +5,13 @@ from django.core.files import File
 from django.http import FileResponse
 from django.shortcuts import render,redirect,HttpResponse
 from django.contrib import messages
-from pytube import YouTube
+from pytube import YouTube,Playlist
+
 # Create your views here.
 
 ######### youtube ######
+from yt_download.utils import download_playlist,on_progress
+
 
 def youtube_link_page(request):
     return render(request,'yt_download/youtube_link_page.html')
@@ -19,17 +22,12 @@ def get_video_info(request):
             url = request.POST.get('url')
             yt = YouTube(url)
             videos = []
-            audios = []
-            video_only = yt.streams.filter(progressive=True)
-            audio_only = yt.streams.filter(abr='128kbps', only_audio=True)
+            video_only = yt.streams.filter(mime_type="video/mp4")
             if video_only:
                 for i in video_only:
                     vid_size = round(i.filesize/1024/1024, 1)
                     videos.append([i, vid_size])
-            if audio_only:
-                audios.append(audio_only[0])
-                audios.append(round(audio_only[0].filesize/1024/1024, 1))
-            context = {'videos': videos, 'audios': audios, 'thumbnail': yt.thumbnail_url, 'title': yt.title, 'url': url}
+            context = {'videos': videos, 'thumbnail': yt.thumbnail_url, 'title': yt.title, 'url': url}
             return render(request, 'yt_download/youtube_link_page.html', context)
 
         except Exception as e:
@@ -39,44 +37,69 @@ def get_video_info(request):
         return redirect(youtube_link_page)
 
 
+
 def download_file(request):
     if request.method == "POST":
         url = request.POST.get('url')
         itag = request.POST.get('itag')
 
-        yt = YouTube(url).streams.get_by_itag(itag)
+        yt = YouTube(url,on_progress_callback=on_progress).streams.get_by_itag(itag)
         title = yt.title
         file_extension = yt.mime_type.split('/')[1]
 
         homedir = os.path.expanduser("~")
         dirs = os.path.join(homedir, 'Downloads')
+        print(">>>>>11")
+        yt.download(output_path=dirs, filename=f"{title}.{file_extension}")
+        print(">>>>>22")
+        file_path = os.path.join(dirs, f"{title}.{file_extension}")
+        file = FileResponse(open(file_path, 'rb'), as_attachment=True)
+        # os.remove(file_path)
+        return file
 
-        if yt.type != 'audio':
-            # yt.download(output_path=dirs, filename=f"{title}.mp4")
-            # # Get the file path of the downloaded video
-            # file_path = os.path.join(dirs, f"{title}.mp4")
-
-            # Open the downloaded file as a Django File object
-            # with open(file_path, 'rb') as file:
-                # file_wrapper = File(file)
-                # file_wrapper.name = file_wrapper.name.replace("." + file_extension, "") + "_yt" + "." + file_extension
-                # Create an HTTP response with the file as attachment
-                # response = HttpResponse(file_wrapper, content_type=f'video/{file_extension}')
-                # response['Content-Disposition'] = f'attachment; filename="{file_wrapper.name}"'
-                #
-                # # Remove the downloaded file from the server
-                # os.remove(file_path)
-                #
-                # return response
-
-            return FileResponse(open(yt.download(skip_existing=True,output_path=dirs  ), 'rb'),as_attachment=True)
+def youtube_playlist_link_page(request):
+    return render(request,'yt_download/youtube_playlist_link_page.html')
 
 
-        else:
-            yt.download(output_path=dirs, filename=f"{yt.title}.mp3")
-            file_path = os.path.join(dirs, f"{title}.mp3")
-            file = FileWrapper(open(file_path, 'rb'))
-            response = HttpResponse(file, content_type='application/audio.mp3')
-            response['Content-Disposition'] = f'attachment; filename = "{title}.mp3"'
-            os.remove(file_path)
-            return response
+def get_playlist_videos(request):
+    if request.method == "POST":
+        try:
+            url = request.POST.get('url')
+            pl = Playlist(url)
+            videos = []
+            total_videos = len(pl)
+            thumbnail_img=''
+            try:
+                thumbnail_img = pl.initial_data.get("microformat")['microformatDataRenderer'].get('thumbnail')['thumbnails'][-1].get('url')
+            except Exception as e:
+                pass
+
+            for video in pl.videos:
+                print(video)
+                highest_clearity_video = video.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()
+                videos.append({
+                    'itag':highest_clearity_video.itag,
+                    'title':video.title,
+                    'video_url':video.watch_url,
+                    'thumbnail_url':video.thumbnail_url,
+                    'size':round(highest_clearity_video.filesize/1024/1024, 1),
+                })
+            context = {'videos': videos, 'thumbnail': thumbnail_img, 'title': pl.title, 'url': url,'total_videos':total_videos}
+            return render(request, 'yt_download/youtube_playlist_link_page.html', context)
+
+        except Exception as e:
+            print(">>>e",e)
+            messages.warning(request, "Not found! Please check the URL(Link)")
+            return redirect(youtube_link_page)
+    else:
+        return redirect(youtube_playlist_link_page)
+
+
+def download_playlist_view(request):
+    if request.method == 'POST':
+        playlist_url = request.POST.get('playlist_url')
+        if playlist_url:
+            download_playlist(playlist_url)
+            return HttpResponse('Downloading videos from the playlist. Please check your downloads folder.')
+
+    return render(request, 'download_playlist.html')

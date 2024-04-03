@@ -5,7 +5,7 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-      <h1>Single Youtube Video/Audio Download</h1>
+      <h1>Single Youtube Video Download</h1>
 
     </div><!-- End Page Title -->
 
@@ -18,12 +18,10 @@
                   <!-- Recent Activity -->
                   <div class="card">
                     <div class="card-body">
-                        <form action="single/info" method="post" class="w-100 pt-5">
+                        <form action="{% url 'youtube_single_video_info' %}" method="post" class="w-100 pt-5">
                             {% csrf_token %}
                             <div class="row mb-3">
-        <!--                      <label  for="url" class="col-sm-3 col-form-label text-center">-->
-        <!--                          <strong>Paste Link here</strong>-->
-        <!--                      </label>-->
+
                               <div class="col-sm-11 py-2">
                                 <input type="search"  id="url" name="url" placeholder="Paste YouTube Video URL(Link) Here" required class="form-control">
                               </div>
@@ -38,6 +36,7 @@
               </div>
       </section>
     </div>
+    {% if videos %}
     <div class="container">
        <section class="section dashboard">
               <div class="row">
@@ -62,7 +61,6 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>Type</th>
                                         <th>Resolution</th>
                                         <th>Download</th>
                                     </tr>
@@ -73,7 +71,6 @@
                                     <form action="file/download" method="post" class="form">
                                         {% csrf_token %}
                                         <tr>
-                                            <td>{{i.0.mime_type}}</td>
                                             <td>{{i.0.resolution}} ({{i.1}}MB)</td>
                                             <input type="hidden" name="url" value="{{url}}">
                                             <input type="hidden" name="itag" value="{{i.0.itag}}">
@@ -81,19 +78,6 @@
                                         </tr>
                                     </form>
                                     {% endfor %}
-                                    {% endif %}
-
-                                    {% if audios %}
-                                    <form action="file/download" method="post" class="form">
-                                        {% csrf_token %}
-                                        <tr>
-                                            <td>audio/mp3</td>
-                                            <td>{{audios.0.abr}} ({{audios.1}}MB)</td>
-                                            <input type="hidden" name="url" value="{{url}}">
-                                            <input type="hidden" name="itag" value="{{audios.0.itag}}">
-                                            <td><button class="btn btn-success btn-sm" type="submit">Download</button></td>
-                                        </tr>
-                                    </form>
                                     {% endif %}
                                 </tbody>
                             </table>
@@ -104,5 +88,6 @@
               </div>
        </section>
     </div>
+    {% endif %}
 </main>
 {% endblock content %}

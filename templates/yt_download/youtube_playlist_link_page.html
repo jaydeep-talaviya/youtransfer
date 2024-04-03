@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<main id="main" class="main">
+
+    <div class="pagetitle">
+      <h1>Youtube Videos Download</h1>
+
+    </div><!-- End Page Title -->
+
+    <div class="container">
+       <section class="section dashboard">
+              <div class="row">
+                <!-- Right side columns -->
+                <div class="col-lg-12">
+
+                  <!-- Recent Activity -->
+                  <div class="card">
+                    <div class="card-body">
+                        <form action="{% url 'youtube_multi_video_info' %}" method="post" class="w-100 pt-5">
+                            {% csrf_token %}
+                            <div class="row mb-3">
+
+                              <div class="col-sm-11 py-2">
+                                <input type="search"  id="url" name="url" placeholder="Paste YouTube Playlist URL(Link) Here" required class="form-control">
+                              </div>
+                                <div class="col-sm-1 py-2">
+                                    <button type="submit" class="btn btn-danger">Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+      </section>
+    </div>
+    {% if videos %}
+    <div class="container">
+       <section class="section dashboard">
+              <div class="row">
+                <!-- Right side columns -->
+                <div class="col-lg-12">
+
+                  <!-- Recent Activity -->
+                  <div class="card">
+                    <div class="card-body">
+                        <div class="card-title">
+                             <h2>Download Below</h2>
+                        </div>
+
+                         <div class="yt-thumb d-flex flex-column align-items-center">
+                             {% if thumbnail %}
+                            <a href="{{url}}" target="_blank">
+                                <img src="{{thumbnail}}" alt="thumbnail" width="300" height="180">
+                            </a>
+                             {% endif %}
+                            <h2 class="mt-3 mb-4 mx-2">{{title}}</h2>
+                             <h5 class="mx-2">Total Videos : {{total_videos}}</h5>
+                            <form action="{% url 'download_playlist_videos' %}" method="post" class="form">
+                                    {% csrf_token %}
+                                <input type="hidden" name="playlist_url" value="{{url}}"/>
+                                 <button class="btn btn-danger">Download All </button>
+                            </form>
+                        </div>
+
+                        <div class=" mt-3">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Video</th>
+                                        <th>Title</th>
+                                        <th>Size</th>
+                                        <th>Download</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="table-group-divider">
+                                    {% for video in videos %}
+                                        <tr>
+                                            <td>
+                                                 <a href="{{video.video_url}}" target="_blank">
+                                                    <img src="{{video.thumbnail_url}}" alt="thumbnail" width="200" height="180">
+                                                </a>
+                                            </td>
+                                            <td>
+                                                {{video.title}}
+                                            </td>
+                                            <td>
+                                                {{video.size}} MB
+                                            </td>
+                                            <td>
+                                                 <form action="{% url 'youtube_single_file_download' %}" method="post" class="form">
+                                                    {% csrf_token %}
+                                                        <input type="hidden" name="url" value="{{video.video_url}}">
+                                                        <input type="hidden" name="itag" value="{{video.itag}}">
+                                                        <button class="btn btn-success btn-sm" type="submit">Download</button>
+                                                    </form>
+                                            </td>
+
+                                        </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+       </section>
+    </div>
+    {% endif %}
+</main>
+{% endblock content %}
