@@ -3,7 +3,13 @@
 {% block content %}
 
 <main id="main" class="main">
+<div class="alert alert-primary bg-primary text-light border-0 alert-dismissible fade" role="alert" id="ajaxResponseDiv">
+    <!-- Content will be dynamically added here -->
+            Downloading videos from the playlist. Please check your downloads folder.
 
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close">
+    </button>
+</div>
     <div class="pagetitle">
       <h1>Youtube Videos Download</h1>
 
@@ -131,7 +137,8 @@ $(document).ready(function() {
             headers: {'X-CSRFToken': csrfToken}, // Include CSRF token in headers
             success: function(response) {
                 // Handle the success response
-                alert('Downloading videos from the playlist. Please check your downloads folder.');
+<!--                alert('Downloading videos from the playlist. Please check your downloads folder.');-->
+                $('.alert').addClass('show')
                 // You can also redirect the user or update the UI as needed
             },
             error: function(xhr, status, error) {
