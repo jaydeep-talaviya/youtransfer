@@ -34,14 +34,19 @@ CSRF_TRUSTED_ORIGINS = ['https://651f-2409-4041-6e95-4185-c4ef-c10c-725d-4889.in
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
     'fileshare',
-    'yt_download'
+    'yt_download',
+
+
 ]
 
 MIDDLEWARE = [
@@ -52,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
 ]
 AUTH_USER_MODEL = 'fileshare.user'
 ROOT_URLCONF = 'youtransfer.urls'
@@ -67,13 +73,12 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'youtransfer.wsgi.application'
+ASGI_APPLICATION = 'youtransfer.asgi.application'
 
 
 # Database
@@ -129,6 +134,14 @@ MESSAGE_TAGS = {
         messages.ERROR: 'alert-danger',
 }
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
@@ -147,6 +160,8 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS=[
     os.path.join(BASE_DIR,'static')
 ]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
@@ -157,36 +172,36 @@ MEDIA_URL = '/media/'
 
 CELERY_BROKER_URL = 'redis://localhost:6379'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
-# CELERY_ACCEPT_CONTENT = ['application/json']
-# CELERY_TASK_SERIALIZER = 'json'
-# CELERY_RESULT_SERIALIZER = 'json'
-# CELERY_TIMEZONE = 'Asia/Kolkata'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Kolkata'
 
 # DataFlair #Logging Information
-LOGGING = {
-    'version': 1,
-    # Version of logging
-    'disable_existing_loggers': False,
-    #disable logging 
-    # Handlers #############################################################
-    'handlers': {
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': 'youtransfer-debug.log',
-        },
-########################################################################
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    # Loggers ####################################################################
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
-            'propagate': True,
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG')
-        },
-    },
-}
+# LOGGING = {
+#     'version': 1,
+#     # Version of logging
+#     'disable_existing_loggers': False,
+#     #disable logging
+#     # Handlers #############################################################
+#     'handlers': {
+#         'file': {
+#             'level': 'DEBUG',
+#             'class': 'logging.FileHandler',
+#             'filename': 'youtransfer-debug.log',
+#         },
+# ########################################################################
+#         'console': {
+#             'class': 'logging.StreamHandler',
+#         },
+#     },
+#     # Loggers ####################################################################
+#     'loggers': {
+#         'django': {
+#             'handlers': ['file'],
+#             'level': 'DEBUG',
+#             'propagate': True,
+#             'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG')
+#         },
+#     },
+# }

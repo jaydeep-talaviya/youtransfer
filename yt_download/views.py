@@ -1,8 +1,6 @@
 import os
-from wsgiref.util import FileWrapper
-
 from django.core.files import File
-from django.http import FileResponse
+from django.http import JsonResponse,FileResponse
 from django.shortcuts import render,redirect,HttpResponse
 from django.contrib import messages
 from pytube import YouTube,Playlist
@@ -49,9 +47,9 @@ def download_file(request):
 
         homedir = os.path.expanduser("~")
         dirs = os.path.join(homedir, 'Downloads')
-        print(">>>>>11")
+        print("download started \n\n")
         yt.download(output_path=dirs, filename=f"{title}.{file_extension}")
-        print(">>>>>22")
+        print("download finished \n\n")
         file_path = os.path.join(dirs, f"{title}.{file_extension}")
         file = FileResponse(open(file_path, 'rb'), as_attachment=True)
         # os.remove(file_path)
@@ -96,10 +94,11 @@ def get_playlist_videos(request):
 
 
 def download_playlist_view(request):
+    username = request.user.username
     if request.method == 'POST':
         playlist_url = request.POST.get('playlist_url')
         if playlist_url:
-            download_playlist(playlist_url)
-            return HttpResponse('Downloading videos from the playlist. Please check your downloads folder.')
-
-    return render(request, 'download_playlist.html')
+            download_playlist.apply_async((playlist_url,username))
+            return JsonResponse({"message":"Your Playlist is being downloaded in background, Please check your downloads folder"})
+        else:
+            return JsonResponse({"message":"Playlist not found"})

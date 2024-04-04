@@ -58,11 +58,9 @@
                              {% endif %}
                             <h2 class="mt-3 mb-4 mx-2">{{title}}</h2>
                              <h5 class="mx-2">Total Videos : {{total_videos}}</h5>
-                            <form action="{% url 'download_playlist_videos' %}" method="post" class="form">
                                     {% csrf_token %}
                                 <input type="hidden" name="playlist_url" value="{{url}}"/>
-                                 <button class="btn btn-danger">Download All </button>
-                            </form>
+                                 <button class="btn btn-danger download_all_btn">Download All </button>
                         </div>
 
                         <div class=" mt-3">
@@ -79,12 +77,13 @@
                                     {% for video in videos %}
                                         <tr>
                                             <td>
-                                                 <a href="{{video.video_url}}" target="_blank">
+                                                 <a class="video_url_check" href="{{video.video_url}}" target="_blank">
                                                     <img src="{{video.thumbnail_url}}" alt="thumbnail" width="200" height="180">
                                                 </a>
                                             </td>
                                             <td>
                                                 {{video.title}}
+                                                <span class="show_downloaded">(100%)</span>
                                             </td>
                                             <td>
                                                 {{video.size}} MB
@@ -111,4 +110,101 @@
     </div>
     {% endif %}
 </main>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    console.log(">>>>>Step 1")
+    $('.download_all_btn').click(function(e) {
+        e.preventDefault(); // Prevent the default form submission
+
+        var csrfToken =$(document).find('input[name="csrfmiddlewaretoken"]').val(); // Get CSRF token
+            var playlistUrl = $('input[name="playlist_url"]').val(); // Get playlist URL
+        var formData = {'csrfmiddlewaretoken': csrfToken, 'playlist_url': playlistUrl}; // Form data object
+
+    console.log(">>>>>Step 2",csrfToken)
+
+        $.ajax({
+            type: 'POST',
+            url: '{% url "download_playlist_videos" %}',
+            data: formData,
+            headers: {'X-CSRFToken': csrfToken}, // Include CSRF token in headers
+            success: function(response) {
+                // Handle the success response
+                alert('Downloading videos from the playlist. Please check your downloads folder.');
+                // You can also redirect the user or update the UI as needed
+            },
+            error: function(xhr, status, error) {
+                // Handle errors if any
+                alert('Error occurred while downloading. Please try again.');
+            }
+        });
+    });
+});
+
+
+<!--######### wesocket socket ###########-->
+
+ {% if user.is_authenticated %}
+         {% with room_name=user.username %}
+
+         const roomName ="{{ room_name }}";
+         console.log(">>>>>>>>>roomName",roomName)
+        {% endwith %}
+
+           const notificationSocket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/notification/'
+            + roomName
+            + '/'
+        );
+
+          // Send a heartbeat message every 10 minutes
+        const heartbeatInterval = 5 * 60 * 1000; // 5 minutes
+        let heartbeatTimer;
+
+        function sendHeartbeat() {
+            console.log(">>>>>>>",notificationSocket.readyState,WebSocket.OPEN)
+          if (notificationSocket.readyState === WebSocket.OPEN) {
+<!--            console.log(">>>> step 2",notificationSocket)-->
+            notificationSocket.send(JSON.stringify({ message: 'heartbeat' }));
+<!--            console.log(">>>>notificationSocket",notificationSocket)-->
+          }
+        }
+
+        notificationSocket.onopen = function() {
+            console.log(">>>open")
+          // Set up heartbeat interval
+          heartbeatTimer = setInterval(sendHeartbeat, heartbeatInterval);
+        };
+
+
+        notificationSocket.onmessage = function(e) {
+             console.log(">>>sdssds>>>e",e)
+            const data = JSON.parse(e.data);
+           if (data.message != 'heartbeat'){
+            console.log(">>>>>>>received",data.message,data.video_url)
+             $('a.video_url_check').each(function() {
+                console.log("<<<<<<",$(this).attr('href'),data.video_url)
+                    if ($(this).attr('href').split("watch?")[1] === data.video_url.split("watch?")[1]) {
+                        $(this).closest('tr').find('td:nth-child(2)').find('span').text(`(${data.message})`);
+                    }
+                });
+           }
+       }
+        notificationSocket.onerror = function(e) {
+            console.log(">>>error",e)
+        }
+
+        notificationSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+            clearInterval(heartbeatTimer); // Clear the heartbeat interval
+            heartbeatTimer = setInterval(sendHeartbeat, heartbeatInterval);
+
+        };
+
+
+    {% endif %}
+</script>
 {% endblock content %}
