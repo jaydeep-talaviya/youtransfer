@@ -3,7 +3,12 @@
 {% block content %}
 
 <main id="main" class="main">
-
+<div class="alert alert-primary bg-primary text-light border-0 alert-dismissible fade" role="alert" id="ajaxResponseDiv">
+    <!-- Content will be dynamically added here -->
+            Your Video is being download. Please check your downloads folder.
+    <button type="button" class="btn-close close_alert btn-close-white"">
+    </button>
+</div>
     <div class="pagetitle">
       <h1>Single Youtube Video Download</h1>
 
@@ -68,15 +73,15 @@
                                 <tbody class="table-group-divider">
                                     {% if videos %}
                                     {% for i in videos %}
-                                    <form action="file/download" method="post" class="form">
+<!--                                    <form action="file/download" method="post" class="form">-->
                                         {% csrf_token %}
                                         <tr>
-                                            <td>{{i.0.resolution}} ({{i.1}}MB)</td>
+                                            <td>{{i.0.resolution}} ({{i.1}}MB) <span class="percentage_show"></span></td>
                                             <input type="hidden" name="url" value="{{url}}">
                                             <input type="hidden" name="itag" value="{{i.0.itag}}">
-                                            <td><button class="btn btn-success btn-sm" type="submit">Download</button></td>
+                                            <td><button class="download_all btn btn-success btn-sm download_btn">Download</button></td>
                                         </tr>
-                                    </form>
+<!--                                    </form>-->
                                     {% endfor %}
                                     {% endif %}
                                 </tbody>
@@ -90,4 +95,115 @@
     </div>
     {% endif %}
 </main>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script>
+$(document).ready(function() {
+
+     $('.close_alert').click(function() {
+         $('.alert').removeClass('show')
+    })
+
+
+    console.log(">>>>>Step 1")
+    $('.download_all').click(function(e) {
+        console.log(">>>>>>>e",e)
+        e.preventDefault(); // Prevent the default form submission
+
+        var csrfToken =$(document).find('input[name="csrfmiddlewaretoken"]').val(); // Get CSRF token
+            var url = "{{url}}" // Get playlist URL
+            var itag = $(e.target.parentElement.parentElement).find('input[name="itag"]').val(); // Get playlist URL
+
+        var formData = {'csrfmiddlewaretoken': csrfToken,'url':url,'itag': itag}; // Form data object
+
+    console.log(">>>>>Step 2",formData)
+
+        $.ajax({
+            type: 'POST',
+            url: '{% url "youtube_single_file_download" %}',
+            data: formData,
+            headers: {'X-CSRFToken': csrfToken}, // Include CSRF token in headers
+            success: function(response) {
+                // Handle the success response
+<!--                alert('Downloading videos from the playlist. Please check your downloads folder.');-->
+                $('.alert').addClass('show')
+                // You can also redirect the user or update the UI as needed
+            },
+            error: function(xhr, status, error) {
+                // Handle errors if any
+                alert('Error occurred while downloading. Please try again.');
+            }
+        });
+    });
+});
+
+
+<!--######### wesocket socket ###########-->
+
+ {% if user.is_authenticated %}
+         {% with room_name=user.username %}
+
+         const roomName ="{{ room_name }}";
+         console.log(">>>>>>>>>roomName",roomName)
+        {% endwith %}
+
+           const notificationSocket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/notification/'
+            + roomName
+            + '/'
+        );
+
+          // Send a heartbeat message every 10 minutes
+        const heartbeatInterval = 5 * 60 * 1000; // 5 minutes
+        let heartbeatTimer;
+
+        function sendHeartbeat() {
+            console.log(">>>>>>>",notificationSocket.readyState,WebSocket.OPEN)
+          if (notificationSocket.readyState === WebSocket.OPEN) {
+<!--            console.log(">>>> step 2",notificationSocket)-->
+            notificationSocket.send(JSON.stringify({ message: 'heartbeat' }));
+<!--            console.log(">>>>notificationSocket",notificationSocket)-->
+          }
+        }
+
+        notificationSocket.onopen = function() {
+            console.log(">>>open")
+          // Set up heartbeat interval
+          heartbeatTimer = setInterval(sendHeartbeat, heartbeatInterval);
+        };
+
+
+        notificationSocket.onmessage = function(e) {
+             console.log(">>>sdssds>>>e",e)
+            const data = JSON.parse(e.data);
+           if (data.message != 'heartbeat'){
+            console.log(">>>>>>>received",data.message,data.itag)
+             $('input[name="itag"]').each(function() {
+                console.log("<<<<<<",$(this)[0].value, data.itag)
+                    if ($(this)[0].value === data.itag) {
+                        $($(this)[0]).parent().find('.percentage_show')[0].style.borderRadius='5px'
+                        $($(this)[0]).parent().find('.percentage_show')[0].style.padding='5px'
+                        $($(this)[0]).parent().find('.percentage_show')[0].style.background='blue'
+
+                        $($(this)[0]).parent().find('.percentage_show').text(` ${data.message} File`);
+                    }
+                });
+           }
+       }
+        notificationSocket.onerror = function(e) {
+            console.log(">>>error",e)
+        }
+
+        notificationSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+            clearInterval(heartbeatTimer); // Clear the heartbeat interval
+            heartbeatTimer = setInterval(sendHeartbeat, heartbeatInterval);
+
+        };
+
+
+    {% endif %}
+</script>
 {% endblock content %}

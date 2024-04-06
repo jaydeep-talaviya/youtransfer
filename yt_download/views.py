@@ -8,7 +8,7 @@ from pytube import YouTube,Playlist
 # Create your views here.
 
 ######### youtube ######
-from yt_download.utils import download_playlist,on_progress
+from yt_download.utils import download_playlist,on_progress,download_single_video
 
 
 def youtube_link_page(request):
@@ -40,20 +40,24 @@ def download_file(request):
     if request.method == "POST":
         url = request.POST.get('url')
         itag = request.POST.get('itag')
+        download_single_video.apply_async((url,itag,request.user.username))
+        return JsonResponse({"message":"Your Video is being download in background, Please check your downloads folder"})
+    else:
+        return JsonResponse({"message":"Playlist not found"})
 
-        yt = YouTube(url,on_progress_callback=on_progress).streams.get_by_itag(itag)
-        title = yt.title
-        file_extension = yt.mime_type.split('/')[1]
-
-        homedir = os.path.expanduser("~")
-        dirs = os.path.join(homedir, 'Downloads')
-        print("download started \n\n")
-        yt.download(output_path=dirs, filename=f"{title}.{file_extension}")
-        print("download finished \n\n")
-        file_path = os.path.join(dirs, f"{title}.{file_extension}")
-        file = FileResponse(open(file_path, 'rb'), as_attachment=True)
-        # os.remove(file_path)
-        return file
+        # yt = YouTube(url,on_progress_callback=on_progress).streams.get_by_itag(itag)
+        # title = yt.title
+        # file_extension = yt.mime_type.split('/')[1]
+        #
+        # homedir = os.path.expanduser("~")
+        # dirs = os.path.join(homedir, 'Downloads')
+        # print("download started \n\n")
+        # yt.download(output_path=dirs, filename=f"{title}.{file_extension}",on_progress_callback=lambda stream, chunk, bytes_remaining: on_progress(stream, chunk, bytes_remaining,request.user.username,url))
+        # print("download finished \n\n")
+        # file_path = os.path.join(dirs, f"{title}.{file_extension}")
+        # file = FileResponse(open(file_path, 'rb'), as_attachment=True)
+        # # os.remove(file_path)
+        # return file
 
 def youtube_playlist_link_page(request):
     return render(request,'yt_download/youtube_playlist_link_page.html')
